@@ -1,0 +1,66 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors 1v1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .choice {
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rock Paper Scissors 1v1</h1>
+    <input type="text" id="usernameInput" placeholder="Enter your username">
+    <button onclick="setUsername()">Set Username</button>
+    <div id="choices" style="display: none;">
+        <div class="choice" onclick="play('rock')">
+            <img src="rock.png" width="100" alt="Rock">
+        </div>
+        <div class="choice" onclick="play('paper')">
+            <img src="paper.png" width="100" alt="Paper">
+        </div>
+        <div class="choice" onclick="play('scissors')">
+            <img src="scissors.png" width="100" alt="Scissors">
+        </div>
+    </div>
+    <div id="result"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function setUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username !== '') {
+                socket.emit('setUsername', username);
+                document.getElementById('usernameInput').disabled = true;
+                document.querySelector('button').disabled = true;
+                document.getElementById('choices').style.display = 'block';
+            }
+        }
+
+        function play(choice) {
+            socket.emit('play', choice);
+        }
+
+        socket.on('opponentPlayed', (data) => {
+            const opponentChoice = data.choice;
+            const result = data.result;
+            const opponentUsername = data.username; // Get opponent's username
+            console.log(`${opponentUsername} chose ${opponentChoice}. Result: ${result}`);
+
+            // Display result on the webpage
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText += `${opponentUsername} chose ${opponentChoice}. Result: ${result}\n`;
+        });
+    </script>
+</body>
+</html>
